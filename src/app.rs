@@ -6,7 +6,6 @@ use crate::processing;
 #[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(default)]
 pub struct MainApp {
-
     #[serde(skip)]
     state: processing::State,
 }
@@ -76,7 +75,7 @@ impl eframe::App for MainApp {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let Self {state} = self;
+        let Self { state } = self;
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
@@ -85,13 +84,19 @@ impl eframe::App for MainApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-
             ui.horizontal(|ui| {
-                ui.add(egui::TextEdit::multiline(&mut state.text).desired_rows(60).desired_width(600.0));
+                ui.add(
+                    egui::TextEdit::multiline(&mut state.text)
+                        .desired_rows(60)
+                        .desired_width(600.0),
+                );
                 // ui.add(egui::TextEdit::multiline(&mut state.text).desired_rows(60).desired_width(600.0));
-                ui.add(egui::TextEdit::multiline(&mut processing::parse1(state.text.as_str())).desired_rows(60).desired_width(600.0));
+                ui.add(
+                    egui::TextEdit::multiline(&mut processing::parse1(state.text.as_str()))
+                        .desired_rows(60)
+                        .desired_width(600.0),
+                );
             });
-
         });
     }
 }

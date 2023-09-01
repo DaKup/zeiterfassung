@@ -22,12 +22,15 @@ pub fn parse1(text: &str) -> String {
         // (None, None) => &lines[..],
     };
 
-    
     if lines.is_empty() {
         return "Could not parse file".to_string();
     }
     // remove empty lines
-    let lines = lines.iter().filter(|line| !line.is_empty()).cloned().collect::<Vec<_>>();
+    let lines = lines
+        .iter()
+        .filter(|line| !line.is_empty())
+        .cloned()
+        .collect::<Vec<_>>();
 
     // join lines
     let text = lines.join("\n");

@@ -1,6 +1,5 @@
 #![warn(clippy::all)]
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct State {
     pub text: String,
