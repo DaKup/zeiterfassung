@@ -1,5 +1,16 @@
 # zeiterfassung
 
+## format
+```bash
+cargo fmt
+```
+
+## check warnings
+```bash
+cargo clippy -- -D warnings
+cargo clippy --target wasm32-unknown-unknown -- -D warnings
+```
+
 ## run local native
 ```bash
 cargo run --release
