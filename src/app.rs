@@ -91,8 +91,16 @@ impl eframe::App for MainApp {
                         .desired_width(600.0),
                 );
                 // ui.add(egui::TextEdit::multiline(&mut state.text).desired_rows(60).desired_width(600.0));
+
+                let mut x = processing::parse1(state.text.as_str());
                 ui.add(
-                    egui::TextEdit::multiline(&mut processing::parse1(state.text.as_str()))
+                    egui::TextEdit::multiline(&mut x.0)
+                        .desired_rows(60)
+                        .desired_width(600.0),
+                );
+
+                ui.add(
+                    egui::TextEdit::multiline(&mut x.1)
                         .desired_rows(60)
                         .desired_width(600.0),
                 );
