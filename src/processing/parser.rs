@@ -48,7 +48,6 @@ pub fn parse_markdown(text: &str) -> String {
 }
 
 pub fn parse_log(text: &str) -> (String, String) {
-    
     let lines = text.split('\n').collect::<Vec<_>>();
 
     let re = Regex::new(r"- [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} +*").unwrap();
@@ -66,13 +65,16 @@ pub fn parse_log(text: &str) -> (String, String) {
     let dates = entries.iter().map(|date| &date[2..21]).collect::<Vec<_>>();
 
     // get the 22th to the second to last character:
-    
+
     use egui::TextBuffer;
     let tasks = entries
-    .iter()
-    // .map(|date| &date[22..date.chars().count()-1 * date.byte_index_from_char_index(char_index)])
-    .map(|date| &date[date.byte_index_from_char_index(22)..date.byte_index_from_char_index(date.chars().count()-1)])
-    .collect::<Vec<_>>();
+        .iter()
+        // .map(|date| &date[22..date.chars().count()-1 * date.byte_index_from_char_index(char_index)])
+        .map(|date| {
+            &date[date.byte_index_from_char_index(22)
+                ..date.byte_index_from_char_index(date.chars().count() - 1)]
+        })
+        .collect::<Vec<_>>();
 
     // also handle multi-byte characters like öäü:
     // let tasks = entries
@@ -149,9 +151,9 @@ pub fn parse_date(text: &str) -> String {
     let duration = format!("{:.2}", time);
 
     durations.append(&mut vec![duration]);
-    
+
     // durations.append(other);
     durations.join("\n")
-    
+
     // durations
 }

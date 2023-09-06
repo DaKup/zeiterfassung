@@ -3,6 +3,7 @@ use rfd::AsyncFileDialog;
 use crate::platform;
 use crate::processing;
 use crate::processing::parse_date;
+// use async_trait::async_trait;
 
 #[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(default)]
@@ -20,21 +21,121 @@ impl MainApp {
     }
 }
 
+// #[async_trait]
+// trait OnClickedOpen {
+//     async fn on_clicked_open(&self);
+// }
+
+// #[async_trait]
+// impl OnClickedOpen for MainApp {
+
+//     async fn on_clicked_open(&self) {
+//         let file_handle = AsyncFileDialog::new()
+//             .add_filter("Markdown", &["md"])
+//             // .pick_file()
+//             .pick_files()
+//             .await;
+
+//         if file_handle.is_none() {
+//             return;
+//         }
+
+//         let mut all_data = String::new();
+
+//         let file_handles = file_handle.unwrap();
+//         for file_handle in file_handles {
+//             let path = file_handle.path();
+//             let data = std::fs::read(path).unwrap();
+//             let data = String::from_utf8_lossy(&data).to_string();
+//             all_data.push_str(&data);
+//             all_data.push_str("\n---\n");
+//             // *gpc.lock().unwrap() = parse_gpc(&data);
+//         }
+
+//         *self.state.markdown_content.lock().unwrap() = all_data;
+
+//         // let data = match file_handle {
+//         //     Some(x) => x.read().await,
+//         //     None => return,
+//         // };
+
+//         // let _data = String::from_utf8_lossy(&data).to_string();
+//         // // *gpc.lock().unwrap() = parse_gpc(&data);
+//     }
+// }
+
+trait OnClickedOpen {
+    fn on_clicked_open(&self);
+}
+
+impl OnClickedOpen for MainApp {
+    fn on_clicked_open(&self) {
+        async fn run(/*Arc<Mutex<String>> markdown_content*/) {
+            let file_handle = AsyncFileDialog::new()
+                .add_filter("Markdown", &["md"])
+                .pick_files()
+                .await;
+
+            if file_handle.is_none() {
+                return;
+            }
+
+            let _all_data = String::new();
+
+            let _file_handles = file_handle.unwrap();
+            // for file_handle in file_handles {
+            //     let path = file_handle.path();
+            //     let data = std::fs::read(path).unwrap();
+            //     let data = String::from_utf8_lossy(&data).to_string();
+            //     all_data.push_str(&data);
+            //     all_data.push_str("\n---\n");
+            //     // *gpc.lock().unwrap() = parse_gpc(&data);
+            // }
+
+            // let data = match file_handle {
+            //     Some(x) => x.read().await,
+            //     None => return,
+            // };
+
+            // let _data = String::from_utf8_lossy(&data).to_string();
+            // // *gpc.lock().unwrap() = parse_gpc(&data);
+        }
+
+        platform::spawn_async(run(/*self.state.markdown_text.clone() */));
+    }
+}
+
 fn _on_clicked_open() {
     async fn run() {
         let file_handle = AsyncFileDialog::new()
-            .add_filter("gpc", &["gpc.json"])
-            .pick_file()
-            // .pick_files()
+            .add_filter("Markdown", &["md"])
+            // .pick_file()
+            .pick_files()
             .await;
 
-        let data = match file_handle {
-            Some(x) => x.read().await,
-            None => return,
-        };
+        if file_handle.is_none() {
+            return;
+        }
 
-        let _data = String::from_utf8_lossy(&data).to_string();
-        // *gpc.lock().unwrap() = parse_gpc(&data);
+        let _all_data = String::new();
+
+        let _file_handles = file_handle.unwrap();
+        // for file_handle in file_handles {
+        //     let path = file_handle.path();
+        //     let data = std::fs::read(path).unwrap();
+        //     let data = String::from_utf8_lossy(&data).to_string();
+        //     all_data.push_str(&data);
+        //     all_data.push_str("\n---\n");
+        //     // *gpc.lock().unwrap() = parse_gpc(&data);
+        // }
+
+        // let data = match file_handle {
+        //     Some(x) => x.read().await,
+        //     None => return,
+        // };
+
+        // let _data = String::from_utf8_lossy(&data).to_string();
+        // // *gpc.lock().unwrap() = parse_gpc(&data);
     }
 
     platform::spawn_async(run());
@@ -76,23 +177,25 @@ impl eframe::App for MainApp {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let Self { state } = self;
+        // let Self { state } = self;
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                ui.menu_button("File", |_ui| {});
+                ui.menu_button("File", |ui| {
+                    if ui.button("Open").clicked() {
+                        // _on_clicked_open();
+                        // platform::spawn_async(self.on_clicked_open());
+                        // self.on_clicked_open();
+                        // platform::spawn_async(self.on_clicked_open());
+                    }
+                });
             });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            let num_lines1 = state.text.lines().count();
-
-            let mut parsed_markdown = processing::parse_markdown(state.text.as_str());
+            let mut parsed_markdown = processing::parse_markdown(self.state.text.as_str());
             let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
 
-            let num_lines2 = parsed_markdown.lines().count();
-            let num_lines3 = timestamps.lines().count();
-            let num_lines4 = tasks.lines().count();
             let width = ui.available_width() / 3.0;
 
             let mut duration = parse_date(&timestamps);
@@ -100,25 +203,23 @@ impl eframe::App for MainApp {
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
                     ui.add(
-                        egui::TextEdit::multiline(&mut state.text)
-                            // .desired_rows(60)
-                            .desired_rows(num_lines1 + 1)
-                            // .desired_width(600.0),
+                        egui::TextEdit::multiline(&mut self.state.text)
+                            .desired_rows(1)
                             .desired_width(width),
                     );
                     ui.add(
                         egui::TextEdit::multiline(&mut parsed_markdown)
-                            .desired_rows(num_lines2)
+                            .desired_rows(1)
                             .desired_width(width),
                     );
                     ui.add(
                         egui::TextEdit::multiline(&mut timestamps)
-                            .desired_rows(num_lines3)
+                            .desired_rows(1)
                             .desired_width(width),
                     );
                     ui.add(
                         egui::TextEdit::multiline(&mut tasks)
-                            .desired_rows(num_lines4)
+                            .desired_rows(1)
                             .desired_width(width),
                     );
                 });
