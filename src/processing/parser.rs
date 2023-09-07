@@ -11,23 +11,23 @@ pub fn parse_markdown(text: &str) -> String {
 
     let lines = text.split('\n').collect::<Vec<_>>();
 
-    // let log_line = lines.iter().position(|line| line.starts_with("## Log"));
-    // let notes_line = lines.iter().position(|line| line.starts_with("## Notes"));
+    let log_line = lines.iter().position(|line| line.starts_with("## Log"));
+    let notes_line = lines.iter().position(|line| line.starts_with("## Notes"));
 
-    // // take all lines between "## Log" and "## Notes"
-    // let lines = match (log_line, notes_line) {
-    //     (Some(log_line), Some(notes_line)) => {
-    //         if log_line > notes_line {
-    //             return "Could not parse file".to_string();
-    //         }
-    //         &lines[log_line + 1..notes_line]
-    //     }
-    //     // (None, Some(_)) => &lines[0..0],
-    //     // (Some(_), None) => &lines[0..0],
-    //     (Some(log_line), None) => &lines[log_line + 1..],
-    //     (None, Some(notes_line)) => &lines[..notes_line],
-    //     (None, None) => &lines[..],
-    // };
+    // take all lines between "## Log" and "## Notes"
+    let lines = match (log_line, notes_line) {
+        (Some(log_line), Some(notes_line)) => {
+            if log_line > notes_line {
+                return "Could not parse file".to_string();
+            }
+            &lines[log_line + 1..notes_line]
+        }
+        // (None, Some(_)) => &lines[0..0],
+        // (Some(_), None) => &lines[0..0],
+        (Some(log_line), None) => &lines[log_line + 1..],
+        (None, Some(notes_line)) => &lines[..notes_line],
+        (None, None) => &lines[..],
+    };
 
     // if lines.is_empty() {
     //     return "Could not parse file".to_string();
@@ -72,7 +72,7 @@ pub fn parse_log(text: &str) -> (String, String) {
         // .map(|date| &date[22..date.chars().count()-1 * date.byte_index_from_char_index(char_index)])
         .map(|date| {
             &date[date.byte_index_from_char_index(22)
-                ..date.byte_index_from_char_index(date.chars().count() - 1)]
+                ..date.byte_index_from_char_index(date.chars().count())]
         })
         .collect::<Vec<_>>();
 

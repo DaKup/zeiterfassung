@@ -1,3 +1,6 @@
+use std::sync::Arc;
+use std::sync::Mutex;
+
 use rfd::AsyncFileDialog;
 
 use crate::platform;
@@ -70,7 +73,10 @@ trait OnClickedOpen {
 
 impl OnClickedOpen for MainApp {
     fn on_clicked_open(&self) {
-        async fn run(/*Arc<Mutex<String>> markdown_content*/) {
+        async fn run(
+            /*Arc<Mutex<String>> markdown_content*/
+            markdown_content: Arc<Mutex<String>>,
+        ) {
             let file_handle = AsyncFileDialog::new()
                 .add_filter("Markdown", &["md"])
                 .pick_files()
@@ -80,17 +86,19 @@ impl OnClickedOpen for MainApp {
                 return;
             }
 
-            let _all_data = String::new();
+            let mut all_data = String::new();
 
-            let _file_handles = file_handle.unwrap();
-            // for file_handle in file_handles {
-            //     let path = file_handle.path();
-            //     let data = std::fs::read(path).unwrap();
-            //     let data = String::from_utf8_lossy(&data).to_string();
-            //     all_data.push_str(&data);
-            //     all_data.push_str("\n---\n");
-            //     // *gpc.lock().unwrap() = parse_gpc(&data);
-            // }
+            let file_handles = file_handle.unwrap();
+            for file_handle in file_handles {
+                // let path = file_handle.path();
+                // let data = std::fs::read(path).unwrap();
+                let data = file_handle.read().await;
+                let data = String::from_utf8_lossy(&data).to_string();
+                all_data.push_str(&data);
+                all_data.push_str("\n---\n");
+                // *gpc.lock().unwrap() = parse_gpc(&data);
+            }
+            *markdown_content.lock().unwrap() = all_data;
 
             // let data = match file_handle {
             //     Some(x) => x.read().await,
@@ -101,45 +109,48 @@ impl OnClickedOpen for MainApp {
             // // *gpc.lock().unwrap() = parse_gpc(&data);
         }
 
-        platform::spawn_async(run(/*self.state.markdown_text.clone() */));
+        platform::spawn_async(run(
+            self.state.markdown_content.clone(), /*self.state.markdown_text.clone() */
+        ));
     }
 }
 
-fn _on_clicked_open() {
-    async fn run() {
-        let file_handle = AsyncFileDialog::new()
-            .add_filter("Markdown", &["md"])
-            // .pick_file()
-            .pick_files()
-            .await;
+// fn _on_clicked_open() {
+//     async fn run() {
+//         let file_handle = AsyncFileDialog::new()
+//             .add_filter("Markdown", &["md"])
+//             // .pick_file()
+//             .pick_files()
+//             .await;
 
-        if file_handle.is_none() {
-            return;
-        }
+//         if file_handle.is_none() {
+//             return;
+//         }
 
-        let _all_data = String::new();
+//         let mut all_data = String::new();
 
-        let _file_handles = file_handle.unwrap();
-        // for file_handle in file_handles {
-        //     let path = file_handle.path();
-        //     let data = std::fs::read(path).unwrap();
-        //     let data = String::from_utf8_lossy(&data).to_string();
-        //     all_data.push_str(&data);
-        //     all_data.push_str("\n---\n");
-        //     // *gpc.lock().unwrap() = parse_gpc(&data);
-        // }
+//         let file_handles = file_handle.unwrap();
+//         for file_handle in file_handles {
+//             // let path = file_handle.path();
+//             // let data = std::fs::read(path).unwrap();
+//             let data = file_handle.read().await;
+//             let data = String::from_utf8_lossy(&data).to_string();
+//             all_data.push_str(&data);
+//             all_data.push_str("\n---\n");
+//             // *gpc.lock().unwrap() = parse_gpc(&data);
+//         }
 
-        // let data = match file_handle {
-        //     Some(x) => x.read().await,
-        //     None => return,
-        // };
+//         // let data = match file_handle {
+//         //     Some(x) => x.read().await,
+//         //     None => return,
+//         // };
 
-        // let _data = String::from_utf8_lossy(&data).to_string();
-        // // *gpc.lock().unwrap() = parse_gpc(&data);
-    }
+//         // let _data = String::from_utf8_lossy(&data).to_string();
+//         // // *gpc.lock().unwrap() = parse_gpc(&data);
+//     }
 
-    platform::spawn_async(run());
-}
+//     platform::spawn_async(run());
+// }
 
 fn _on_clicked_save() {
     async fn run() {
@@ -185,7 +196,7 @@ impl eframe::App for MainApp {
                     if ui.button("Open").clicked() {
                         // _on_clicked_open();
                         // platform::spawn_async(self.on_clicked_open());
-                        // self.on_clicked_open();
+                        self.on_clicked_open();
                         // platform::spawn_async(self.on_clicked_open());
                     }
                 });
@@ -194,6 +205,7 @@ impl eframe::App for MainApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             let mut parsed_markdown = processing::parse_markdown(self.state.text.as_str());
+            // let mut parsed_markdown = processing::parse_markdown(self.state.markdown_content.lock().unwrap().as_str());
             let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
 
             let width = ui.available_width() / 3.0;
