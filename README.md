@@ -1,5 +1,7 @@
 # zeiterfassung
 
+See also https://github.com/pajoma/vscode-journal
+
 ## format
 ```bash
 cargo fmt
