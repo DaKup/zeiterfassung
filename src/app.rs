@@ -197,39 +197,51 @@ impl eframe::App for MainApp {
             let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
 
             let width = ui.available_width() / 3.0;
+            let available_width = ui.available_width();
+            let available_height = ui.available_height();
 
             let mut duration = parse_date(&timestamps);
 
-            ui.horizontal(|ui| {
-                ui.vertical(|ui| {
-                    ui.add(
-                        egui::TextEdit::multiline(&mut self.state.text)
-                            .desired_rows(1)
-                            .desired_width(width),
-                    );
-                    ui.add(
-                        egui::TextEdit::multiline(&mut parsed_markdown)
-                            .desired_rows(1)
-                            .desired_width(width),
-                    );
-                    ui.add(
-                        egui::TextEdit::multiline(&mut timestamps)
-                            .desired_rows(1)
-                            .desired_width(width),
-                    );
-                    ui.add(
-                        egui::TextEdit::multiline(&mut tasks)
-                            .desired_rows(1)
-                            .desired_width(width),
-                    );
-                });
+            egui::ScrollArea::horizontal()
+                .min_scrolled_width(available_width)
+                .show(ui, |ui| {
+                    ui.style_mut().wrap = Some(false);
+                    ui.horizontal(|ui| {
+                        egui::ScrollArea::vertical()
+                            .min_scrolled_height(available_height)
+                            .show(ui, |ui| {
+                                ui.style_mut().wrap = Some(false);
+                                ui.vertical(|ui| {
+                                    ui.add(
+                                        egui::TextEdit::multiline(&mut self.state.text)
+                                            .desired_rows(1)
+                                            .desired_width(width),
+                                    );
+                                    ui.add(
+                                        egui::TextEdit::multiline(&mut parsed_markdown)
+                                            .desired_rows(1)
+                                            .desired_width(width),
+                                    );
+                                    ui.add(
+                                        egui::TextEdit::multiline(&mut timestamps)
+                                            .desired_rows(1)
+                                            .desired_width(width),
+                                    );
+                                    ui.add(
+                                        egui::TextEdit::multiline(&mut tasks)
+                                            .desired_rows(1)
+                                            .desired_width(width),
+                                    );
+                                });
 
-                ui.add(
-                    egui::TextEdit::multiline(&mut duration)
-                        .desired_rows(3)
-                        .desired_width(width),
-                );
-            });
+                                ui.add(
+                                    egui::TextEdit::multiline(&mut duration)
+                                        .desired_rows(1)
+                                        .desired_width(width),
+                                );
+                            });
+                    });
+                });
         });
     }
 }
