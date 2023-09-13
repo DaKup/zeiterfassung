@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -68,14 +69,15 @@ impl MainApp {
 // }
 
 trait OnClickedOpen {
-    fn on_clicked_open(&self);
+    fn on_clicked_open(&mut self);
 }
 
 impl OnClickedOpen for MainApp {
-    fn on_clicked_open(&self) {
+    fn on_clicked_open(&mut self) {
         async fn run(
             /*Arc<Mutex<String>> markdown_content*/
             markdown_content: Arc<Mutex<String>>,
+            overwrite_input: Arc<AtomicBool>,
         ) {
             let file_handle = AsyncFileDialog::new()
                 .add_filter("Markdown", &["md"])
@@ -99,7 +101,10 @@ impl OnClickedOpen for MainApp {
                 // *gpc.lock().unwrap() = parse_gpc(&data);
             }
             *markdown_content.lock().unwrap() = all_data;
+            // *overwrite_input.lock().unwrap() = true;
+            // *overwrite_input.get_mut() = true;
 
+            overwrite_input.store(true, Ordering::Relaxed);
             // let data = match file_handle {
             //     Some(x) => x.read().await,
             //     None => return,
@@ -110,7 +115,8 @@ impl OnClickedOpen for MainApp {
         }
 
         platform::spawn_async(run(
-            self.state.markdown_content.clone(), /*self.state.markdown_text.clone() */
+            self.state.markdown_content_backbuffer.clone(), /*self.state.markdown_text.clone() */
+            self.state.overwrite_input.clone(),
         ));
     }
 }
@@ -204,7 +210,18 @@ impl eframe::App for MainApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            let mut parsed_markdown = processing::parse_markdown(self.state.text.as_str());
+            if self.state.overwrite_input.load(Ordering::Relaxed) {
+                self.state.overwrite_input.store(false, Ordering::Relaxed);
+                self.state.markdown_input = self
+                    .state
+                    .markdown_content_backbuffer
+                    .lock()
+                    .unwrap()
+                    .to_string();
+            }
+
+            let mut parsed_markdown =
+                processing::parse_markdown(self.state.markdown_input.as_str());
             // let mut parsed_markdown = processing::parse_markdown(self.state.markdown_content.lock().unwrap().as_str());
             let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
 
@@ -225,7 +242,7 @@ impl eframe::App for MainApp {
                                 ui.style_mut().wrap = Some(false);
                                 ui.vertical(|ui| {
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut self.state.text)
+                                        egui::TextEdit::multiline(&mut self.state.markdown_input)
                                             .desired_rows(1)
                                             .desired_width(width),
                                     );
