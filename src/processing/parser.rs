@@ -10,11 +10,12 @@ pub fn extract_log_lines(markdown: &str) -> Vec<String> {
         .filter(|l| !l.is_empty())
         .collect::<Vec<_>>();
 
-    let begin = lines.iter().position(|l| l.starts_with("## Log"));
-    let end = lines.iter().rev().position(|l| l.starts_with("## Notes"));
+    let begin = lines.iter().position(|&l| l.starts_with("## Log"));
+    let end = lines.iter().rev().position(|&l| l.starts_with("## Notes"));
 
     match (begin, end) {
         (Some(begin), Some(end)) => {
+            let end = lines.len() - end - 1;
             if end > begin {
                 markdown
                     .lines()
@@ -35,7 +36,7 @@ pub fn extract_log_lines(markdown: &str) -> Vec<String> {
     }
 }
 
-pub fn parse_log_lines(markdown_lines: Vec<String>) -> Vec<(i64, String)> {
+pub fn parse_log_lines(markdown_lines: &[String]) -> Vec<(NaiveDateTime, String)> {
     let re = Regex::new(r"- [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} .*").unwrap();
     let log_lines = markdown_lines
         .iter()
@@ -56,7 +57,7 @@ pub fn parse_log_lines(markdown_lines: Vec<String>) -> Vec<(i64, String)> {
             let datetime = chrono::NaiveDateTime::parse_from_str(time_string, "%Y-%m-%d %H:%M:%S");
 
             match datetime {
-                Ok(datetime) => Some((datetime.timestamp(), task_string.to_string())),
+                Ok(datetime) => Some((datetime, task_string.to_string())),
                 Err(_) => None,
             }
         })
@@ -71,8 +72,6 @@ pub fn parse_log_lines(markdown_lines: Vec<String>) -> Vec<(i64, String)> {
 
     timestamps_tasks
 }
-
-/////////
 
 pub fn parse_markdown(text: &str) -> String {
     let text = text.to_string();

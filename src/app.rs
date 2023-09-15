@@ -5,8 +5,8 @@ use std::sync::Mutex;
 use rfd::AsyncFileDialog;
 
 use crate::platform;
-use crate::processing;
 use crate::processing::parse_date;
+use crate::processing::{self, extract_log_lines, parse_log_lines, round_timestamp_tasks};
 // use async_trait::async_trait;
 
 #[derive(serde::Deserialize, serde::Serialize, Default)]
@@ -24,49 +24,6 @@ impl MainApp {
         Default::default()
     }
 }
-
-// #[async_trait]
-// trait OnClickedOpen {
-//     async fn on_clicked_open(&self);
-// }
-
-// #[async_trait]
-// impl OnClickedOpen for MainApp {
-
-//     async fn on_clicked_open(&self) {
-//         let file_handle = AsyncFileDialog::new()
-//             .add_filter("Markdown", &["md"])
-//             // .pick_file()
-//             .pick_files()
-//             .await;
-
-//         if file_handle.is_none() {
-//             return;
-//         }
-
-//         let mut all_data = String::new();
-
-//         let file_handles = file_handle.unwrap();
-//         for file_handle in file_handles {
-//             let path = file_handle.path();
-//             let data = std::fs::read(path).unwrap();
-//             let data = String::from_utf8_lossy(&data).to_string();
-//             all_data.push_str(&data);
-//             all_data.push_str("\n---\n");
-//             // *gpc.lock().unwrap() = parse_gpc(&data);
-//         }
-
-//         *self.state.markdown_content.lock().unwrap() = all_data;
-
-//         // let data = match file_handle {
-//         //     Some(x) => x.read().await,
-//         //     None => return,
-//         // };
-
-//         // let _data = String::from_utf8_lossy(&data).to_string();
-//         // // *gpc.lock().unwrap() = parse_gpc(&data);
-//     }
-// }
 
 trait OnClickedOpen {
     fn on_clicked_open(&mut self);
@@ -92,26 +49,13 @@ impl OnClickedOpen for MainApp {
 
             let file_handles = file_handle.unwrap();
             for file_handle in file_handles {
-                // let path = file_handle.path();
-                // let data = std::fs::read(path).unwrap();
                 let data = file_handle.read().await;
                 let data = String::from_utf8_lossy(&data).to_string();
                 all_data.push_str(&data);
                 all_data.push_str("\n---\n");
-                // *gpc.lock().unwrap() = parse_gpc(&data);
             }
             *markdown_content.lock().unwrap() = all_data;
-            // *overwrite_input.lock().unwrap() = true;
-            // *overwrite_input.get_mut() = true;
-
             overwrite_input.store(true, Ordering::Relaxed);
-            // let data = match file_handle {
-            //     Some(x) => x.read().await,
-            //     None => return,
-            // };
-
-            // let _data = String::from_utf8_lossy(&data).to_string();
-            // // *gpc.lock().unwrap() = parse_gpc(&data);
         }
 
         platform::spawn_async(run(
@@ -120,43 +64,6 @@ impl OnClickedOpen for MainApp {
         ));
     }
 }
-
-// fn _on_clicked_open() {
-//     async fn run() {
-//         let file_handle = AsyncFileDialog::new()
-//             .add_filter("Markdown", &["md"])
-//             // .pick_file()
-//             .pick_files()
-//             .await;
-
-//         if file_handle.is_none() {
-//             return;
-//         }
-
-//         let mut all_data = String::new();
-
-//         let file_handles = file_handle.unwrap();
-//         for file_handle in file_handles {
-//             // let path = file_handle.path();
-//             // let data = std::fs::read(path).unwrap();
-//             let data = file_handle.read().await;
-//             let data = String::from_utf8_lossy(&data).to_string();
-//             all_data.push_str(&data);
-//             all_data.push_str("\n---\n");
-//             // *gpc.lock().unwrap() = parse_gpc(&data);
-//         }
-
-//         // let data = match file_handle {
-//         //     Some(x) => x.read().await,
-//         //     None => return,
-//         // };
-
-//         // let _data = String::from_utf8_lossy(&data).to_string();
-//         // // *gpc.lock().unwrap() = parse_gpc(&data);
-//     }
-
-//     platform::spawn_async(run());
-// }
 
 fn _on_clicked_save() {
     async fn run() {
@@ -200,16 +107,14 @@ impl eframe::App for MainApp {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Open").clicked() {
-                        // _on_clicked_open();
-                        // platform::spawn_async(self.on_clicked_open());
                         self.on_clicked_open();
-                        // platform::spawn_async(self.on_clicked_open());
                     }
                 });
             });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            // new files were opened:
             if self.state.overwrite_input.load(Ordering::Relaxed) {
                 self.state.overwrite_input.store(false, Ordering::Relaxed);
                 self.state.markdown_input = self
@@ -220,17 +125,36 @@ impl eframe::App for MainApp {
                     .to_string();
             }
 
-            let mut parsed_markdown =
-                processing::parse_markdown(self.state.markdown_input.as_str());
-            // let mut parsed_markdown = processing::parse_markdown(self.state.markdown_content.lock().unwrap().as_str());
-            let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
-
-            let width = ui.available_width() / 3.0;
+            // screen size:
             let available_width = ui.available_width();
             let available_height = ui.available_height();
 
+            // parse:
+            // input = self.state.markdown_input;
+            self.state.log_lines = extract_log_lines(&self.state.markdown_input);
+            self.state.timestamp_tasks = parse_log_lines(&self.state.log_lines);
+            self.state.rounded_timestamp_tasks = round_timestamp_tasks(&self.state.timestamp_tasks);
+
+            let rounded_timestamps: Vec<String> = self
+                .state
+                .rounded_timestamp_tasks
+                .iter()
+                .map(|x| {
+                    let (a, _) = x;
+
+                    a.to_string()
+                })
+                .collect();
+
+            let mut rounded_timestamps = rounded_timestamps.join("\n");
+
+            // parse old:
+            let mut parsed_markdown =
+                processing::parse_markdown(self.state.markdown_input.as_str());
+            let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
             let mut duration = parse_date(&timestamps);
 
+            // ui:
             egui::ScrollArea::horizontal()
                 .min_scrolled_width(available_width)
                 .show(ui, |ui| {
@@ -244,29 +168,34 @@ impl eframe::App for MainApp {
                                     ui.add(
                                         egui::TextEdit::multiline(&mut self.state.markdown_input)
                                             .desired_rows(1)
-                                            .desired_width(width),
+                                            .desired_width(available_width / 3.0),
                                     );
                                     ui.add(
                                         egui::TextEdit::multiline(&mut parsed_markdown)
                                             .desired_rows(1)
-                                            .desired_width(width),
+                                            .desired_width(available_width / 3.0),
                                     );
                                     ui.add(
                                         egui::TextEdit::multiline(&mut timestamps)
                                             .desired_rows(1)
-                                            .desired_width(width),
+                                            .desired_width(available_width / 3.0),
                                     );
                                     ui.add(
                                         egui::TextEdit::multiline(&mut tasks)
                                             .desired_rows(1)
-                                            .desired_width(width),
+                                            .desired_width(available_width / 3.0),
                                     );
                                 });
 
                                 ui.add(
                                     egui::TextEdit::multiline(&mut duration)
                                         .desired_rows(1)
-                                        .desired_width(width),
+                                        .desired_width(available_width / 3.0),
+                                );
+                                ui.add(
+                                    egui::TextEdit::multiline(&mut rounded_timestamps)
+                                        .desired_rows(1)
+                                        .desired_width(available_width / 3.0),
                                 );
                             });
                     });
