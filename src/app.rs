@@ -5,9 +5,8 @@ use std::sync::Mutex;
 use rfd::AsyncFileDialog;
 
 use crate::platform;
-use crate::processing::parse_date;
-use crate::processing::{self, extract_log_lines, parse_log_lines, round_timestamp_tasks};
-// use async_trait::async_trait;
+use crate::processing::Update;
+use crate::processing::{self};
 
 #[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(default)]
@@ -114,89 +113,209 @@ impl eframe::App for MainApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // new files were opened:
-            if self.state.overwrite_input.load(Ordering::Relaxed) {
-                self.state.overwrite_input.store(false, Ordering::Relaxed);
-                self.state.markdown_input = self
-                    .state
-                    .markdown_content_backbuffer
-                    .lock()
-                    .unwrap()
-                    .to_string();
-            }
+            let show_debug = true;
 
             // screen size:
             let available_width = ui.available_width();
             let available_height = ui.available_height();
 
-            // parse:
-            // input = self.state.markdown_input;
-            self.state.log_lines = extract_log_lines(&self.state.markdown_input);
-            self.state.timestamp_tasks = parse_log_lines(&self.state.log_lines);
-            self.state.rounded_timestamp_tasks = round_timestamp_tasks(&self.state.timestamp_tasks);
+            self.state.update();
 
-            let rounded_timestamps: Vec<String> = self
+            let mut lines_of_interest = self.state.log_lines.join("\n");
+
+            let mut rounded_timestamps = self
                 .state
                 .rounded_timestamp_tasks
                 .iter()
                 .map(|x| {
                     let (a, _) = x;
-
                     a.to_string()
                 })
-                .collect();
+                .collect::<Vec<_>>()
+                .join("\n");
 
-            let mut rounded_timestamps = rounded_timestamps.join("\n");
+            let mut timestamps = self
+                .state
+                .timestamp_tasks
+                .iter()
+                .map(|x| {
+                    let (a, _) = x;
+                    a.to_string()
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
 
-            // parse old:
-            let mut parsed_markdown =
-                processing::parse_markdown(self.state.markdown_input.as_str());
-            let (mut timestamps, mut tasks) = processing::parse_log(parsed_markdown.as_str());
-            let mut duration = parse_date(&timestamps);
+            let mut tasks = self
+                .state
+                .timestamp_tasks
+                .iter()
+                .map(|x| {
+                    let (_, b) = x;
+                    b.clone()
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+
+            let mut durations = self
+                .state
+                .durations
+                .iter()
+                .map(|duration| {
+                    let time =
+                        duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0;
+                    format!("{:.2}h", time)
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+
+            let mut rounded_durations = self
+                .state
+                .rounded_durations
+                .iter()
+                .map(|duration| {
+                    let time =
+                        duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0;
+                    format!("{:.2}h", time)
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+
+            let total_duration: f32 = self
+                .state
+                .durations
+                .iter()
+                .map(|duration| {
+                    duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0
+                })
+                .sum();
+            let total_duration = format!("{:.2}h", total_duration);
+
+            let total_rounded_duration: f32 = self
+                .state
+                .rounded_durations
+                .iter()
+                .map(|duration| {
+                    duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0
+                })
+                .sum();
+            let total_rounded_duration = format!("{:.2}h", total_rounded_duration);
 
             // ui:
             egui::ScrollArea::horizontal()
                 .min_scrolled_width(available_width)
                 .show(ui, |ui| {
                     ui.style_mut().wrap = Some(false);
+
                     ui.horizontal(|ui| {
                         egui::ScrollArea::vertical()
                             .min_scrolled_height(available_height)
                             .show(ui, |ui| {
                                 ui.style_mut().wrap = Some(false);
+
+                                // first column: input
                                 ui.vertical(|ui| {
+                                    ui.label("Parsing");
+
+                                    ui.label("");
+                                    ui.label("Markdown Input:");
                                     ui.add(
                                         egui::TextEdit::multiline(&mut self.state.markdown_input)
                                             .desired_rows(1)
                                             .desired_width(available_width / 3.0),
                                     );
+
+                                    if show_debug {
+                                        ui.label("");
+                                        ui.label("Lines of Interest:");
+                                        ui.add(
+                                            egui::TextEdit::multiline(&mut lines_of_interest)
+                                                .desired_rows(1)
+                                                .desired_width(available_width / 3.0),
+                                        );
+                                        ui.label("");
+                                        ui.label("Timestamps:");
+                                        ui.add(
+                                            egui::TextEdit::multiline(&mut timestamps)
+                                                .desired_rows(1)
+                                                .desired_width(available_width / 3.0),
+                                        );
+                                        ui.label("");
+                                        ui.label("Tasks:");
+                                        ui.add(
+                                            egui::TextEdit::multiline(&mut tasks)
+                                                .desired_rows(1)
+                                                .desired_width(available_width / 3.0),
+                                        );
+                                    }
+                                });
+
+                                // second column: processing
+                                ui.vertical(|ui| {
+                                    ui.label("Processing");
+
+                                    ui.label("");
+                                    ui.horizontal(|ui| {
+                                        ui.vertical(|ui| {
+                                            ui.label("Timestamps:");
+                                            ui.add(
+                                                egui::TextEdit::multiline(&mut timestamps)
+                                                    .desired_rows(1)
+                                                    .desired_width(available_width / 3.0 / 2.0),
+                                            );
+                                        });
+                                        ui.vertical(|ui| {
+                                            ui.label("Durations:");
+                                            ui.add(
+                                                egui::TextEdit::multiline(&mut durations)
+                                                    .desired_rows(1)
+                                                    .desired_width(available_width / 3.0 / 2.0),
+                                            );
+                                        });
+                                    });
+                                    ui.label(format!("total: {}", total_duration));
+
+                                    ui.label("");
+                                    ui.horizontal(|ui| {
+                                        ui.vertical(|ui| {
+                                            ui.label("Rounded Timestamps:");
+                                            ui.add(
+                                                egui::TextEdit::multiline(&mut rounded_timestamps)
+                                                    .desired_rows(1)
+                                                    .desired_width(available_width / 3.0 / 2.0),
+                                            );
+                                        });
+                                        ui.vertical(|ui| {
+                                            ui.label("Rounded Durations:");
+                                            ui.add(
+                                                egui::TextEdit::multiline(&mut rounded_durations)
+                                                    .desired_rows(1)
+                                                    .desired_width(available_width / 3.0 / 2.0),
+                                            );
+                                        });
+                                    });
+                                    ui.label(format!("total: {}", total_rounded_duration));
+                                });
+
+                                // third column: results
+                                ui.vertical(|ui| {
+                                    ui.label("Results");
+
+                                    ui.label("");
+                                    ui.label("Results:");
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut parsed_markdown)
+                                        egui::TextEdit::multiline(&mut rounded_timestamps)
                                             .desired_rows(1)
                                             .desired_width(available_width / 3.0),
                                     );
+
+                                    ui.label("");
+                                    ui.label("Durations:");
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut timestamps)
-                                            .desired_rows(1)
-                                            .desired_width(available_width / 3.0),
-                                    );
-                                    ui.add(
-                                        egui::TextEdit::multiline(&mut tasks)
+                                        egui::TextEdit::multiline(&mut rounded_timestamps)
                                             .desired_rows(1)
                                             .desired_width(available_width / 3.0),
                                     );
                                 });
-
-                                ui.add(
-                                    egui::TextEdit::multiline(&mut duration)
-                                        .desired_rows(1)
-                                        .desired_width(available_width / 3.0),
-                                );
-                                ui.add(
-                                    egui::TextEdit::multiline(&mut rounded_timestamps)
-                                        .desired_rows(1)
-                                        .desired_width(available_width / 3.0),
-                                );
                             });
                     });
                 });

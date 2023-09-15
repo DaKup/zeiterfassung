@@ -1,7 +1,10 @@
 #![warn(clippy::all)]
 
-use chrono::NaiveDateTime;
-use std::sync::atomic::AtomicBool;
+use crate::processing::{
+    calculate_durations, extract_log_lines, parse_log_lines, round_timestamp_tasks,
+};
+use chrono::{Duration, NaiveDateTime};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone)]
@@ -13,8 +16,8 @@ pub struct State {
     pub log_lines: Vec<String>,
     pub timestamp_tasks: Vec<(NaiveDateTime, String)>,
     pub rounded_timestamp_tasks: Vec<(NaiveDateTime, String)>,
-    pub durations: Vec<i64>,
-    pub rounded_durations: Vec<i64>,
+    pub durations: Vec<Duration>,
+    pub rounded_durations: Vec<Duration>,
 }
 
 impl Default for State {
@@ -31,5 +34,27 @@ impl Default for State {
             durations: vec![],
             rounded_durations: vec![],
         }
+    }
+}
+
+pub trait Update {
+    fn update(&mut self);
+}
+
+impl Update for State {
+    fn update(&mut self) {
+        // new files were opened:
+        if self.overwrite_input.load(Ordering::Relaxed) {
+            self.overwrite_input.store(false, Ordering::Relaxed);
+            self.markdown_input = self.markdown_content_backbuffer.lock().unwrap().to_string();
+        }
+
+        // parse:
+        // input = self.state.markdown_input;
+        self.log_lines = extract_log_lines(&self.markdown_input);
+        self.timestamp_tasks = parse_log_lines(&self.log_lines);
+        self.rounded_timestamp_tasks = round_timestamp_tasks(&self.timestamp_tasks);
+        self.durations = calculate_durations(&self.timestamp_tasks);
+        self.rounded_durations = calculate_durations(&self.rounded_timestamp_tasks);
     }
 }

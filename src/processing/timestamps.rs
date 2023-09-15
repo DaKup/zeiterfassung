@@ -27,3 +27,17 @@ pub fn round_timestamp_tasks(
 
     result
 }
+
+pub fn calculate_durations(timestamp_tasks: &[(NaiveDateTime, String)]) -> Vec<Duration> {
+    // calculate the difference between each timestamp:
+    let durations = timestamp_tasks
+        .iter()
+        .zip(timestamp_tasks.iter().skip(1))
+        .map(|((time0, task0), (time1, task1))| {
+            let difference = time1.timestamp() - time0.timestamp();
+            Duration::seconds(difference)
+        })
+        .collect::<Vec<_>>();
+
+    durations
+}
