@@ -1,3 +1,4 @@
+use egui::TextBuffer;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -24,17 +25,14 @@ impl MainApp {
     }
 }
 
-trait OnClickedOpen {
+trait OnClickedButtonTrait {
     fn on_clicked_open(&mut self);
+    fn on_clicked_save(&mut self);
 }
 
-impl OnClickedOpen for MainApp {
+impl OnClickedButtonTrait for MainApp {
     fn on_clicked_open(&mut self) {
-        async fn run(
-            /*Arc<Mutex<String>> markdown_content*/
-            markdown_content: Arc<Mutex<String>>,
-            overwrite_input: Arc<AtomicBool>,
-        ) {
+        async fn run(markdown_content: Arc<Mutex<String>>, overwrite_input: Arc<AtomicBool>) {
             let file_handle = AsyncFileDialog::new()
                 .add_filter("Markdown", &["md"])
                 .pick_files()
@@ -58,40 +56,18 @@ impl OnClickedOpen for MainApp {
         }
 
         platform::spawn_async(run(
-            self.state.markdown_content_backbuffer.clone(), /*self.state.markdown_text.clone() */
+            self.state.markdown_content_backbuffer.clone(),
             self.state.overwrite_input.clone(),
         ));
     }
-}
 
-fn _on_clicked_save() {
-    async fn run() {
-        let data = "";
-        // serde_jsonc::to_string_pretty(&gpc.lock().unwrap().geometry_layer.filename).unwrap();
-
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            let file_handle = AsyncFileDialog::new()
-                .add_filter("gpc", &["gpc.json"])
-                .save_file()
-                .await;
-
-            if file_handle.is_some() {
-                let path = file_handle.unwrap();
-                let path = path.path();
-
-                let mut file = std::fs::File::create(path).unwrap();
-                std::io::Write::write_all(&mut file, data.as_bytes()).unwrap();
-            }
+    fn on_clicked_save(&mut self) {
+        async fn run() {
+            platform::save_file("dummy_content".as_str().as_bytes(), "zeiterfassung.md").await;
         }
 
-        #[cfg(target_arch = "wasm32")]
-        {
-            platform::web::download_bytes(data.as_bytes(), "test.gpc.json");
-        }
+        platform::spawn_async(run());
     }
-
-    platform::spawn_async(run());
 }
 
 impl eframe::App for MainApp {
@@ -107,6 +83,9 @@ impl eframe::App for MainApp {
                 ui.menu_button("File", |ui| {
                     if ui.button("Open").clicked() {
                         self.on_clicked_open();
+                    }
+                    if ui.button("Save").clicked() {
+                        self.on_clicked_save();
                     }
                 });
             });
@@ -224,6 +203,7 @@ impl eframe::App for MainApp {
                                             .desired_width(available_width / 3.0),
                                     );
 
+                                    // parser debug output:
                                     if show_debug {
                                         ui.label("");
                                         ui.label("Lines of Interest:");

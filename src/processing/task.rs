@@ -1,0 +1,15 @@
+#![warn(clippy::all)]
+#![allow(unused)]
+
+use crate::processing::Timeframe;
+
+#[derive(Debug, Clone, Default)]
+pub struct Task {
+    // timeframe (from, to), alias => (from, duration)
+    // timeframe variants: exact, rounded, selected?
+    // project: break, [project], note, ignore
+    // description: id?
+    timeframe: Timeframe,
+    project: String,
+    description: String,
+}
