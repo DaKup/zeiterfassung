@@ -9,7 +9,7 @@ pub struct Task {
     // timeframe variants: exact, rounded, selected?
     // project: break, [project], note, ignore
     // description: id?
-    timeframe: Timeframe,
-    project: String,
-    description: String,
+    pub timeframe: Timeframe,
+    pub project: String,
+    pub description: String,
 }

@@ -6,8 +6,8 @@ use std::sync::Mutex;
 use rfd::AsyncFileDialog;
 
 use crate::platform;
-use crate::processing::Update;
 use crate::processing::{self};
+use crate::processing::{TimeframeTrait, Update};
 
 #[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(default)]
@@ -287,6 +287,18 @@ impl eframe::App for MainApp {
                                             .desired_rows(1)
                                             .desired_width(available_width / 3.0),
                                     );
+
+                                    // self.state.tasks[0].description;
+                                    // self.state.tasks[0].project;
+                                    // self.state.tasks[0].timeframe;
+
+                                    for (_i, e) in self.state.tasks.iter().enumerate() {
+                                        ui.label(e.timeframe.round().begin().to_string());
+                                        ui.label(e.timeframe.round().end().to_string());
+                                        ui.label(e.timeframe.round().duration().to_string());
+                                        ui.label(&e.project);
+                                        ui.label(&e.description);
+                                    }
 
                                     ui.label("");
                                     ui.label("Durations:");

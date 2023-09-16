@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
 
 use crate::processing::{
-    calculate_durations, extract_log_lines, parse_log_lines, round_timestamp_tasks,
+    calculate_durations, extract_log_lines, parse_log_lines, round_timestamp_tasks, Task,
 };
 use chrono::{Duration, NaiveDateTime};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -18,6 +18,8 @@ pub struct State {
     pub rounded_timestamp_tasks: Vec<(NaiveDateTime, String)>,
     pub durations: Vec<Duration>,
     pub rounded_durations: Vec<Duration>,
+
+    pub tasks: Vec<Task>,
 }
 
 impl Default for State {
@@ -33,6 +35,7 @@ impl Default for State {
             rounded_timestamp_tasks: vec![],
             durations: vec![],
             rounded_durations: vec![],
+            tasks: vec![],
         }
     }
 }
@@ -56,5 +59,16 @@ impl Update for State {
         self.rounded_timestamp_tasks = round_timestamp_tasks(&self.timestamp_tasks);
         self.durations = calculate_durations(&self.timestamp_tasks);
         self.rounded_durations = calculate_durations(&self.rounded_timestamp_tasks);
+
+        // for (i, e) in self.timestamp_tasks.iter().rev().skip(1).rev().enumerate() {
+        //
+        // }
+
+        self.tasks = vec![
+            Task::default(),
+            Task::default(),
+            Task::default(),
+            Task::default(),
+        ];
     }
 }

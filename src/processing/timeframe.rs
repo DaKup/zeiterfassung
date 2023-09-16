@@ -20,6 +20,19 @@ pub trait TimeframeTrait {
     fn round(&self) -> Timeframe;
 }
 
+pub trait AsMyStringTrait {
+    fn to_string(&self) -> String;
+}
+
+impl AsMyStringTrait for Duration {
+    fn to_string(&self) -> String {
+        format!(
+            "{:.2}h",
+            self.num_hours() as f32 + (self.num_minutes() % 60) as f32 / 60.0
+        )
+    }
+}
+
 impl TimeframeTrait for Timeframe {
     fn begin(&self) -> NaiveDateTime {
         self.begin
