@@ -3,5 +3,6 @@
 mod app;
 pub use app::MainApp;
 
+mod gui;
 mod platform;
 mod processing;
