@@ -1,6 +1,7 @@
 #![warn(clippy::all)]
 #![allow(unused)]
 
+use crate::gui::UpdateOutputsTrait;
 use crate::processing::{TimeframeTrait, Update};
 use crate::MainApp;
 use egui::Ui;
@@ -11,86 +12,87 @@ pub fn central_panel(
     frame: &mut eframe::Frame,
     ui: &mut Ui,
 ) {
-    let show_debug = true;
+    // let show_debug = true;
 
     // screen size:
     let available_width = ui.available_width();
     let available_height = ui.available_height();
 
     app.state.update();
+    app.outputs.update(&app.state);
 
-    let mut lines_of_interest = app.state.log_lines.join("\n");
-
-    let mut rounded_timestamps = app
-        .state
-        .rounded_timestamp_tasks
-        .iter()
-        .map(|x| {
-            let (a, _) = x;
-            a.to_string()
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    let mut timestamps = app
-        .state
-        .timestamp_tasks
-        .iter()
-        .map(|x| {
-            let (a, _) = x;
-            a.to_string()
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    let mut tasks = app
-        .state
-        .timestamp_tasks
-        .iter()
-        .map(|x| {
-            let (_, b) = x;
-            b.clone()
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    let mut durations = app
-        .state
-        .durations
-        .iter()
-        .map(|duration| {
-            let time = duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0;
-            format!("{:.2}h", time)
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    let mut rounded_durations = app
-        .state
-        .rounded_durations
-        .iter()
-        .map(|duration| {
-            let time = duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0;
-            format!("{:.2}h", time)
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    let total_duration: f32 = app
-        .state
-        .durations
-        .iter()
-        .map(|duration| duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0)
-        .sum();
-    let total_duration = format!("{:.2}h", total_duration);
-
-    let total_rounded_duration: f32 = app
-        .state
-        .rounded_durations
-        .iter()
-        .map(|duration| duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0)
-        .sum();
-    let total_rounded_duration = format!("{:.2}h", total_rounded_duration);
+    // let mut lines_of_interest = app.state.log_lines.join("\n");
+    //
+    // let mut rounded_timestamps = app
+    //     .state
+    //     .rounded_timestamp_tasks
+    //     .iter()
+    //     .map(|x| {
+    //         let (a, _) = x;
+    //         a.to_string()
+    //     })
+    //     .collect::<Vec<_>>()
+    //     .join("\n");
+    //
+    // let mut timestamps = app
+    //     .state
+    //     .timestamp_tasks
+    //     .iter()
+    //     .map(|x| {
+    //         let (a, _) = x;
+    //         a.to_string()
+    //     })
+    //     .collect::<Vec<_>>()
+    //     .join("\n");
+    //
+    // let mut tasks = app
+    //     .state
+    //     .timestamp_tasks
+    //     .iter()
+    //     .map(|x| {
+    //         let (_, b) = x;
+    //         b.clone()
+    //     })
+    //     .collect::<Vec<_>>()
+    //     .join("\n");
+    //
+    // let mut durations = app
+    //     .state
+    //     .durations
+    //     .iter()
+    //     .map(|duration| {
+    //         let time = duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0;
+    //         format!("{:.2}h", time)
+    //     })
+    //     .collect::<Vec<_>>()
+    //     .join("\n");
+    //
+    // let mut rounded_durations = app
+    //     .state
+    //     .rounded_durations
+    //     .iter()
+    //     .map(|duration| {
+    //         let time = duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0;
+    //         format!("{:.2}h", time)
+    //     })
+    //     .collect::<Vec<_>>()
+    //     .join("\n");
+    //
+    // let total_duration: f32 = app
+    //     .state
+    //     .durations
+    //     .iter()
+    //     .map(|duration| duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0)
+    //     .sum();
+    // let total_duration = format!("{:.2}h", total_duration);
+    //
+    // let total_rounded_duration: f32 = app
+    //     .state
+    //     .rounded_durations
+    //     .iter()
+    //     .map(|duration| duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0)
+    //     .sum();
+    // let total_rounded_duration = format!("{:.2}h", total_rounded_duration);
 
     // ui:
     egui::ScrollArea::horizontal()
@@ -116,28 +118,36 @@ pub fn central_panel(
                                     .desired_width(available_width / 3.0),
                             );
 
+                            ui.add(egui::Checkbox::new(&mut app.state.show_debug, "Show Debug"));
+
                             // parser debug output:
-                            if show_debug {
+                            if app.state.show_debug {
                                 ui.label("");
                                 ui.label("Lines of Interest:");
                                 ui.add(
-                                    egui::TextEdit::multiline(&mut lines_of_interest)
-                                        .desired_rows(1)
-                                        .desired_width(available_width / 3.0),
+                                    egui::TextEdit::multiline(
+                                        &mut app.outputs.parser.lines_of_interest,
+                                    )
+                                    .desired_rows(1)
+                                    .desired_width(available_width / 3.0),
                                 );
                                 ui.label("");
                                 ui.label("Timestamps:");
                                 ui.add(
-                                    egui::TextEdit::multiline(&mut timestamps)
-                                        .desired_rows(1)
-                                        .desired_width(available_width / 3.0),
+                                    egui::TextEdit::multiline(
+                                        &mut app.outputs.parser.parsed_timestamps,
+                                    )
+                                    .desired_rows(1)
+                                    .desired_width(available_width / 3.0),
                                 );
                                 ui.label("");
                                 ui.label("Tasks:");
                                 ui.add(
-                                    egui::TextEdit::multiline(&mut tasks)
-                                        .desired_rows(1)
-                                        .desired_width(available_width / 3.0),
+                                    egui::TextEdit::multiline(
+                                        &mut app.outputs.parser.parsed_descriptions,
+                                    )
+                                    .desired_rows(1)
+                                    .desired_width(available_width / 3.0),
                                 );
                             }
                         });
@@ -151,42 +161,53 @@ pub fn central_panel(
                                 ui.vertical(|ui| {
                                     ui.label("Timestamps:");
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut timestamps)
-                                            .desired_rows(1)
-                                            .desired_width(available_width / 3.0 / 2.0),
+                                        egui::TextEdit::multiline(
+                                            &mut app.outputs.parser.parsed_timestamps,
+                                        )
+                                        .desired_rows(1)
+                                        .desired_width(available_width / 3.0 / 2.0),
                                     );
                                 });
                                 ui.vertical(|ui| {
                                     ui.label("Durations:");
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut durations)
-                                            .desired_rows(1)
-                                            .desired_width(available_width / 3.0 / 2.0),
+                                        egui::TextEdit::multiline(
+                                            &mut app.outputs.processing.durations_tasks,
+                                        )
+                                        .desired_rows(1)
+                                        .desired_width(available_width / 3.0 / 2.0),
                                     );
                                 });
                             });
-                            ui.label(format!("total: {}", total_duration));
+                            ui.label(format!("total: {}", app.outputs.results.total_durations));
 
                             ui.label("");
                             ui.horizontal(|ui| {
                                 ui.vertical(|ui| {
                                     ui.label("Rounded Timestamps:");
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut rounded_timestamps)
-                                            .desired_rows(1)
-                                            .desired_width(available_width / 3.0 / 2.0),
+                                        egui::TextEdit::multiline(
+                                            &mut app.outputs.results.rounded_timestamp_descriptions,
+                                        )
+                                        .desired_rows(1)
+                                        .desired_width(available_width / 3.0 / 2.0),
                                     );
                                 });
                                 ui.vertical(|ui| {
                                     ui.label("Rounded Durations:");
                                     ui.add(
-                                        egui::TextEdit::multiline(&mut rounded_durations)
-                                            .desired_rows(1)
-                                            .desired_width(available_width / 3.0 / 2.0),
+                                        egui::TextEdit::multiline(
+                                            &mut app.outputs.results.rounded_durations_tasks,
+                                        )
+                                        .desired_rows(1)
+                                        .desired_width(available_width / 3.0 / 2.0),
                                     );
                                 });
                             });
-                            ui.label(format!("total: {}", total_rounded_duration));
+                            ui.label(format!(
+                                "total: {}",
+                                app.outputs.results.total_rounded_durations
+                            ));
                         });
 
                         // third column: results
@@ -196,9 +217,11 @@ pub fn central_panel(
                             ui.label("");
                             ui.label("Results:");
                             ui.add(
-                                egui::TextEdit::multiline(&mut rounded_timestamps)
-                                    .desired_rows(1)
-                                    .desired_width(available_width / 3.0),
+                                egui::TextEdit::multiline(
+                                    &mut app.outputs.results.rounded_timestamp_descriptions,
+                                )
+                                .desired_rows(1)
+                                .desired_width(available_width / 3.0),
                             );
 
                             // app.state.tasks[0].description;
@@ -216,9 +239,11 @@ pub fn central_panel(
                             ui.label("");
                             ui.label("Durations:");
                             ui.add(
-                                egui::TextEdit::multiline(&mut rounded_timestamps)
-                                    .desired_rows(1)
-                                    .desired_width(available_width / 3.0),
+                                egui::TextEdit::multiline(
+                                    &mut app.outputs.results.rounded_timestamp_descriptions,
+                                )
+                                .desired_rows(1)
+                                .desired_width(available_width / 3.0),
                             );
                         });
                     });

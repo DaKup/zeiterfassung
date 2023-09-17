@@ -19,6 +19,7 @@ pub struct State {
     pub durations: Vec<Duration>,
     pub rounded_durations: Vec<Duration>,
 
+    pub show_debug: bool,
     pub synchronize_markdown: bool,
     pub tasks: Vec<Task>,
 }
@@ -36,6 +37,7 @@ impl Default for State {
             rounded_timestamp_tasks: vec![],
             durations: vec![],
             rounded_durations: vec![],
+            show_debug: false,
             synchronize_markdown: true,
             tasks: vec![],
         }
