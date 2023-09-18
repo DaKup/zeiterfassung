@@ -7,20 +7,31 @@ use chrono::{Duration, NaiveDateTime};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
+use super::Timeframe;
+
 #[derive(Debug, Clone)]
 pub struct State {
+    // input:
     pub markdown_input: String,
+
+    // load button:
     pub markdown_content_backbuffer: Arc<Mutex<String>>,
     pub overwrite_input: Arc<AtomicBool>,
 
+    // processing:
     pub log_lines: Vec<String>,
     pub timestamp_tasks: Vec<(NaiveDateTime, String)>,
+
+    // debug/intermediates/tests:
     pub rounded_timestamp_tasks: Vec<(NaiveDateTime, String)>,
     pub durations: Vec<Duration>,
     pub rounded_durations: Vec<Duration>,
 
+    // other:
     pub show_debug: bool,
     pub synchronize_markdown: bool,
+
+    // processing results:
     pub tasks: Vec<Task>,
 }
 
@@ -60,19 +71,25 @@ impl Update for State {
         // input = self.state.markdown_input;
         self.log_lines = extract_log_lines(&self.markdown_input);
         self.timestamp_tasks = parse_log_lines(&self.log_lines);
+
+        // debug/intermediates/tests:
         self.rounded_timestamp_tasks = round_timestamp_tasks(&self.timestamp_tasks);
         self.durations = calculate_durations(&self.timestamp_tasks);
         self.rounded_durations = calculate_durations(&self.rounded_timestamp_tasks);
 
-        // for (i, e) in self.timestamp_tasks.iter().rev().skip(1).rev().enumerate() {
-        //
-        // }
-
-        self.tasks = vec![
-            Task::default(),
-            Task::default(),
-            Task::default(),
-            Task::default(),
-        ];
+        self.tasks = self
+            .timestamp_tasks
+            .iter()
+            .zip(self.timestamp_tasks.iter().skip(1))
+            .map(|(t0, t1)| {
+                let begin = t0.0;
+                let end = t1.0;
+                Task {
+                    timeframe: Timeframe::new(begin, end),
+                    project: String::from("[project]"),
+                    description: t0.1.clone(),
+                }
+            })
+            .collect();
     }
 }

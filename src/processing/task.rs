@@ -13,3 +13,13 @@ pub struct Task {
     pub project: String,
     pub description: String,
 }
+
+impl Task {
+    pub fn new(timeframe: Timeframe, project: String, description: String) -> Self {
+        Self {
+            timeframe,
+            project,
+            description,
+        }
+    }
+}

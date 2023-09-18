@@ -2,8 +2,9 @@
 #![allow(unused)]
 
 use crate::gui::UpdateOutputsTrait;
-use crate::processing::{TimeframeTrait, Update};
+use crate::processing::{AsMyStringTrait, TimeframeTrait, Update};
 use crate::MainApp;
+use chrono::Duration;
 use egui::Ui;
 
 pub fn central_panel(
@@ -224,17 +225,33 @@ pub fn central_panel(
                                 .desired_width(available_width / 3.0),
                             );
 
-                            // app.state.tasks[0].description;
-                            // app.state.tasks[0].project;
-                            // app.state.tasks[0].timeframe;
+                            let mut sum = 0;
+                            let mut rounded_sum = 0;
+
+                            let num_tasks = app.state.tasks.len();
 
                             for (_i, e) in app.state.tasks.iter().enumerate() {
-                                ui.label(e.timeframe.round().begin().to_string());
-                                ui.label(e.timeframe.round().end().to_string());
-                                ui.label(e.timeframe.round().duration().to_string());
-                                ui.label(&e.project);
-                                ui.label(&e.description);
+                                ui.label("");
+                                ui.label(format!(
+                                    "{} => {}",
+                                    e.timeframe.begin(),
+                                    e.timeframe.round().begin()
+                                ));
+                                ui.label(format!(
+                                    "{} => {}",
+                                    e.timeframe.end(),
+                                    e.timeframe.round().end()
+                                ));
+                                ui.label(format!(
+                                    "{} => {}",
+                                    e.timeframe.duration().to_my_string(),
+                                    e.timeframe.round().duration().to_my_string()
+                                ));
+                                ui.label(format!("{}: {}", &e.project, &e.description));
+                                ui.label("");
                             }
+
+                            ui.label(format!("Total: {} => {}", &sum, &rounded_sum));
 
                             ui.label("");
                             ui.label("Durations:");
