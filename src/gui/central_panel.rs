@@ -7,6 +7,8 @@ use crate::MainApp;
 use chrono::Duration;
 use egui::Ui;
 
+use egui::plot::{Bar, BarChart, Legend, Line, Plot, PlotPoints};
+
 pub fn central_panel(
     app: &mut MainApp,
     ctx: &egui::Context,
@@ -156,6 +158,27 @@ pub fn central_panel(
                         // second column: processing
                         ui.vertical(|ui| {
                             ui.label("Processing");
+
+                            let test = Bar::new(3.0, 1.0);
+                            let bars1: Vec<Bar> = vec![
+                                Bar::new(1.0, 2.0).name("test1"),
+                                Bar::new(1.0, 4.0).name("test2"),
+                            ];
+                            let bars2: Vec<Bar> = vec![Bar::new(3.0, 1.0), Bar::new(2.0, 4.0)];
+                            let bars3: Vec<Bar> = vec![Bar::new(3.0, 1.0), Bar::new(2.0, 4.0)];
+                            let bar_chart1 = egui::plot::BarChart::new(bars1).horizontal();
+                            let bar_chart2 = egui::plot::BarChart::new(bars2).horizontal();
+                            let bar_chart3 = egui::plot::BarChart::new(bars3).horizontal();
+                            Plot::new("my_plot")
+                                .view_aspect(2.0)
+                                .width(available_width / 3.0)
+                                .legend(Legend::default())
+                                // .data_aspect(1.0)
+                                .show(ui, |plot_ui| {
+                                    plot_ui.bar_chart(bar_chart1);
+                                    plot_ui.bar_chart(bar_chart2);
+                                    plot_ui.bar_chart(bar_chart3);
+                                });
 
                             ui.label("");
                             ui.horizontal(|ui| {
