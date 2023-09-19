@@ -29,6 +29,7 @@ pub struct State {
 
     // other:
     pub show_debug: bool,
+    pub rounded_plots: bool,
     pub synchronize_markdown: bool,
 
     // processing results:
@@ -49,6 +50,7 @@ impl Default for State {
             durations: vec![],
             rounded_durations: vec![],
             show_debug: false,
+            rounded_plots: false,
             synchronize_markdown: true,
             tasks: vec![],
         }
