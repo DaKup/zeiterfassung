@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
 
 use crate::processing::{
-    calculate_durations, extract_log_lines, parse_log_lines, round_timestamp_tasks, Task,
+    calculate_durations, extract_log_lines, parse_log_lines, round_timestamp_tasks, Task, TaskState,
 };
 use chrono::{Duration, NaiveDateTime};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -30,10 +30,14 @@ pub struct State {
     // other:
     pub show_debug: bool,
     pub rounded_plots: bool,
+    pub log_scale: bool,
     pub synchronize_markdown: bool,
 
     // processing results:
     pub tasks: Vec<Task>,
+
+    pub project_names: Vec<String>,
+    pub task_states: Vec<TaskState>,
 }
 
 impl Default for State {
@@ -51,8 +55,11 @@ impl Default for State {
             rounded_durations: vec![],
             show_debug: false,
             rounded_plots: false,
+            log_scale: true,
             synchronize_markdown: true,
             tasks: vec![],
+            project_names: vec![],
+            task_states: vec![],
         }
     }
 }
@@ -93,5 +100,10 @@ impl Update for State {
                 }
             })
             .collect();
+
+        if self.task_states.len() < self.tasks.len() {
+            self.task_states
+                .resize(self.tasks.len(), TaskState::default());
+        }
     }
 }

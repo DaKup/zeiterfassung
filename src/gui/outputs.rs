@@ -44,7 +44,21 @@ pub trait UpdateOutputsTrait {
 
 impl UpdateOutputsTrait for ParserOutputs {
     fn update(&mut self, state: &State) {
-        self.lines_of_interest = state.log_lines.join("\n");
+        {
+            self.lines_of_interest = state.log_lines.join("\n");
+            self.parsed_timestamps = state
+                .timestamp_tasks
+                .iter()
+                .map(|t| t.0.to_string())
+                .collect::<Vec<_>>()
+                .join("\n");
+            self.parsed_descriptions = state
+                .timestamp_tasks
+                .iter()
+                .map(|t| t.1.to_string())
+                .collect::<Vec<_>>()
+                .join("\n");
+        }
     }
 }
 
