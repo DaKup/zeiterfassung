@@ -36,11 +36,7 @@ pub fn plot_durations(
                 height = (duration as f64).log10();
             }
 
-            Bar::new(
-                project_id as f64,
-                height,
-            )
-                .name(task.description.clone())
+            Bar::new(project_id as f64, height).name(task.description.clone())
         })
         .collect();
 
@@ -232,9 +228,14 @@ pub fn central_panel(
                             // ui.selectable_label(bla, "test this");
                             // ui.selectable_label(app.state.rounded_plots, "round").highlight();
                             // ui.
-                            ui.checkbox(&mut app.state.rounded_plots, "round").highlight();
+                            ui.checkbox(&mut app.state.rounded_plots, "round")
+                                .highlight();
 
-                            plot_durations(app, ctx, frame, ui,
+                            plot_durations(
+                                app,
+                                ctx,
+                                frame,
+                                ui,
                                 available_width / num_columns as f32,
                                 available_height / 5.0,
                                 app.state.rounded_plots,
