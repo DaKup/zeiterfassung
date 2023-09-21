@@ -1,6 +1,10 @@
 # zeiterfassung
 
-See also https://github.com/pajoma/vscode-journal
+[Web Application](dakup.github.io/zeiterfassung)
+
+See also
+- https://github.com/pajoma/vscode-journal
+- https://github.com/jsynowiec/vscode-insertdatestring
 
 ## format
 ```bash
