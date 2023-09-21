@@ -1,6 +1,6 @@
 # zeiterfassung
 
-[Web Application](dakup.github.io/zeiterfassung)
+dakup.github.io/zeiterfassung
 
 See also
 - https://github.com/pajoma/vscode-journal
