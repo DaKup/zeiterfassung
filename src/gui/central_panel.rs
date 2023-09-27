@@ -9,8 +9,6 @@ use egui::Ui;
 
 use egui::plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
 
-
-
 pub fn central_panel(
     app: &mut MainApp,
     ctx: &egui::Context,
@@ -185,7 +183,6 @@ pub fn central_panel(
                             // ui.label(format!("Total: {} => {}", &sum, &rounded_sum)).highlight();
                             ui.label(format!("Total: {} => {}", &sum, &rounded_sum))
                                 .highlight();
-
                         });
                     });
             });

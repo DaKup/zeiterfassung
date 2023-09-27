@@ -1,11 +1,11 @@
 #![warn(clippy::all)]
 #![allow(unused)]
 
+use crate::processing::TimeframeTrait;
+use crate::MainApp;
 use chrono::Timelike;
 use egui::plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Plot};
 use egui::Ui;
-use crate::MainApp;
-use crate::processing::TimeframeTrait;
 
 pub fn plot_timeframes(
     app: &mut MainApp,
@@ -54,7 +54,7 @@ pub fn plot_timeframes(
                 project_id as f64,
                 BoxSpread::new(lower_whisker, quartille1, median, quartille3, upper_whisker),
             )
-                .name(task.description.clone())
+            .name(task.description.clone())
         })
         .collect();
 
