@@ -13,6 +13,7 @@ use super::Timeframe;
 pub struct State {
     // input:
     pub markdown_input: String,
+    pub projects_input: String,
 
     // load button:
     pub markdown_content_backbuffer: Arc<Mutex<String>>,
@@ -36,6 +37,7 @@ pub struct State {
     // processing results:
     pub tasks: Vec<Task>,
 
+    // pub parsed_project_names: Vec<String>,
     pub project_names: Vec<String>,
     pub task_states: Vec<TaskState>,
 }
@@ -44,6 +46,7 @@ impl Default for State {
     fn default() -> Self {
         Self {
             markdown_input: include_str!("example.md").to_string(),
+            projects_input: "".to_string(), // parse from input
             markdown_content_backbuffer: Arc::new(Mutex::new(
                 include_str!("example.md").to_string(),
             )),
@@ -85,6 +88,8 @@ impl Update for State {
         self.rounded_timestamp_tasks = round_timestamp_tasks(&self.timestamp_tasks);
         self.durations = calculate_durations(&self.timestamp_tasks);
         self.rounded_durations = calculate_durations(&self.rounded_timestamp_tasks);
+
+        self.project_names = self.projects_input.lines().map(|l| l.to_string()).collect();
 
         self.tasks = self
             .timestamp_tasks

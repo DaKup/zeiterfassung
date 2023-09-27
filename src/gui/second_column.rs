@@ -18,6 +18,15 @@ pub fn second_column(
     ui.vertical(|ui| {
         // ui.label("Processing");
 
+        // ui.checkbox(&mut app.state.rounded_plots, "edit")
+        //     .highlight();
+        ui.label("Projects:").highlight();
+        ui.add(
+            egui::TextEdit::multiline(&mut app.state.projects_input)
+                .desired_rows(1)
+                .desired_width(available_width / num_columns as f32),
+        );
+
         // ui.selectable_label(bla, "test this");
         // ui.selectable_label(app.state.rounded_plots, "round").highlight();
         // ui.
@@ -35,7 +44,7 @@ pub fn second_column(
             frame,
             ui,
             available_width / num_columns as f32,
-            available_height / 3.0,
+            available_height / 8.0,
         );
 
         ui.label("");
@@ -48,7 +57,7 @@ pub fn second_column(
             frame,
             ui,
             available_width / num_columns as f32,
-            available_height / 3.0,
+            available_height / 8.0,
             app.state.rounded_plots,
         );
     });
