@@ -16,10 +16,30 @@ pub fn first_column(
     // first column: input
     ui.vertical(|ui| {
         ui.label("Markdown Input:").highlight();
+
+        let mut theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+        // ui.collapsing("Theme", |ui| {
+        //     ui.group(|ui| {
+        //         theme.ui(ui);
+        //         theme.clone().store_in_memory(ui.ctx());
+        //     });
+        // });
+
+        let language = "md";
+
+        let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+            let mut layout_job =
+                egui_extras::syntax_highlighting::highlight(ui.ctx(), &theme, string, language);
+            layout_job.wrap.max_width = wrap_width;
+            ui.fonts(|f| f.layout_job(layout_job))
+        };
+
         ui.add(
             egui::TextEdit::multiline(&mut app.state.markdown_input)
+                .code_editor()
                 .desired_rows(1)
-                .desired_width(available_width / num_columns as f32),
+                .desired_width(available_width / num_columns as f32)
+                .layouter(&mut layouter),
         );
 
         // parser debug output:
