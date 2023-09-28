@@ -9,7 +9,7 @@ use crate::MainApp;
 use chrono::{Duration, Timelike};
 use egui::Ui;
 
-use egui::plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
+use egui_plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
 
 pub fn central_panel(
     app: &mut MainApp,

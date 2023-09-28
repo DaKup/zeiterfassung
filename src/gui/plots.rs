@@ -4,8 +4,8 @@
 use crate::processing::TimeframeTrait;
 use crate::MainApp;
 use chrono::Timelike;
-use egui::plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Plot};
 use egui::Ui;
+use egui_plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Plot};
 
 pub fn plot_timeframes(
     app: &mut MainApp,
