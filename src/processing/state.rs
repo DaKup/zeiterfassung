@@ -91,16 +91,25 @@ impl Update for State {
 
         self.project_names = self.projects_input.lines().map(|l| l.to_string()).collect();
 
+        // fn default_name() ->Option<&String>{Some("[project]".to_string())};
+        // let default_name = "[project]".to_string();
+
+        // let project_name= self.project_names.get(0);
+
         self.tasks = self
             .timestamp_tasks
             .iter()
             .zip(self.timestamp_tasks.iter().skip(1))
-            .map(|(t0, t1)| {
+            .enumerate()
+            .map(|(index, (t0, t1))| {
                 let begin = t0.0;
                 let end = t1.0;
                 Task {
                     timeframe: Timeframe::new(begin, end),
-                    project: String::from("[project]"),
+                    project: match self.project_names.get(index) {
+                        None => String::from("[project]"),
+                        Some(x) => x.clone(),
+                    },
                     description: t0.1.clone(),
                 }
             })
