@@ -15,6 +15,13 @@ pub fn first_column(
 ) {
     // first column: input
     ui.vertical(|ui| {
+        ui.label("Projects:").highlight();
+        ui.add(
+            egui::TextEdit::multiline(&mut app.state.projects_input)
+                .desired_rows(1)
+                .desired_width(available_width / num_columns as f32),
+        );
+
         ui.label("Markdown Input:").highlight();
 
         let mut theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
