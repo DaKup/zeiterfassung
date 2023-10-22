@@ -8,8 +8,7 @@ pub async fn save_file_dialog(bytes: impl AsRef<[u8]>) {
         .save_file()
         .await;
 
-    if file_handle.is_some() {
-        let path = file_handle.unwrap();
+    if let Some(path) = file_handle {
         let path = path.path();
 
         let mut file = std::fs::File::create(path).unwrap();
