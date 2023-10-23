@@ -6,7 +6,7 @@ use crate::processing::{self};
 #[serde(default)]
 pub struct MainApp {
     #[serde(skip)]
-    pub state: processing::State,
+    pub state: processing::AppState,
 
     #[serde(skip)]
     pub outputs: gui::Outputs,
