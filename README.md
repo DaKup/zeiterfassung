@@ -16,7 +16,7 @@ cargo run --release
 trunk serve --release
 ```
 
-## format
+## format code
 ```bash
 cargo fmt
 ```
