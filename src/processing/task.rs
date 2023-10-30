@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
 #![allow(unused)]
 
-use crate::processing::Timeframe;
+use crate::processing::zeit::Timeframe;
 
 #[derive(Debug, Clone, Default)]
 pub struct Task {

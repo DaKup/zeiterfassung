@@ -4,7 +4,7 @@
 use crate::gui::{
     first_column, plot_durations, plot_timeframes, second_column, third_column, UpdateOutputsTrait,
 };
-use crate::processing::{AsMyStringTrait, ProjectType, TimeframeTrait, Update};
+use crate::processing::{zeit::AsMyStringTrait, Update};
 use crate::MainApp;
 use chrono::{Duration, Timelike};
 use egui::Ui;

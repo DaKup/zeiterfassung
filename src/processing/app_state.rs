@@ -2,14 +2,14 @@
 
 use crate::processing::{
     calculate_durations, extract_log_lines, parse_log_lines, round_timestamp_tasks,
-    AsMyStringTrait, Task, TaskState, TimeframeTrait,
+    zeit::AsMyStringTrait, Task, TaskState,
 };
 use chrono::{Duration, NaiveDateTime};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
-use super::Timeframe;
+use super::zeit::Timeframe;
 
 #[derive(Debug, Clone)]
 pub struct AppState {

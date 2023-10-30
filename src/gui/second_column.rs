@@ -2,7 +2,7 @@
 #![allow(unused)]
 
 use crate::gui::{plot_durations, plot_timeframes};
-use crate::processing::{AsMyStringTrait, ProjectType, TimeframeTrait};
+use crate::processing::{zeit::AsMyStringTrait, ProjectType};
 use crate::MainApp;
 use egui::Ui;
 

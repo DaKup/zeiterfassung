@@ -14,17 +14,36 @@ impl Timeframe {
     pub fn new(begin: NaiveDateTime, end: NaiveDateTime) -> Self {
         Self { begin, end }
     }
+
+    pub fn begin(&self) -> NaiveDateTime {
+        self.begin
+    }
+
+    pub fn end(&self) -> NaiveDateTime {
+        self.end
+    }
+
+    pub fn duration(&self) -> Duration {
+        Duration::seconds(self.end.timestamp() - self.begin.timestamp())
+    }
+
+    pub fn round(&self) -> Timeframe {
+        Timeframe {
+            begin: round_single_timestamp(&self.begin),
+            end: round_single_timestamp(&self.end),
+        }
+    }
 }
 
-pub trait TimeframeTrait {
-    fn begin(&self) -> NaiveDateTime;
+// pub trait TimeframeTrait {
+//     fn begin(&self) -> NaiveDateTime;
 
-    fn end(&self) -> NaiveDateTime;
+//     fn end(&self) -> NaiveDateTime;
 
-    fn duration(&self) -> Duration;
+//     fn duration(&self) -> Duration;
 
-    fn round(&self) -> Timeframe;
-}
+//     fn round(&self) -> Timeframe;
+// }
 
 pub trait AsMyStringTrait {
     fn to_my_string(&self) -> String;
@@ -39,23 +58,23 @@ impl AsMyStringTrait for Duration {
     }
 }
 
-impl TimeframeTrait for Timeframe {
-    fn begin(&self) -> NaiveDateTime {
-        self.begin
-    }
+// impl TimeframeTrait for Timeframe {
+//     fn begin(&self) -> NaiveDateTime {
+//         self.begin
+//     }
 
-    fn end(&self) -> NaiveDateTime {
-        self.end
-    }
+//     fn end(&self) -> NaiveDateTime {
+//         self.end
+//     }
 
-    fn duration(&self) -> Duration {
-        Duration::seconds(self.end.timestamp() - self.begin.timestamp())
-    }
+//     fn duration(&self) -> Duration {
+//         Duration::seconds(self.end.timestamp() - self.begin.timestamp())
+//     }
 
-    fn round(&self) -> Timeframe {
-        Timeframe {
-            begin: round_single_timestamp(&self.begin),
-            end: round_single_timestamp(&self.end),
-        }
-    }
-}
+//     fn round(&self) -> Timeframe {
+//         Timeframe {
+//             begin: round_single_timestamp(&self.begin),
+//             end: round_single_timestamp(&self.end),
+//         }
+//     }
+// }
