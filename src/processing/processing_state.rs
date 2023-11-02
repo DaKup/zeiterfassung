@@ -12,7 +12,7 @@ use std::sync::{Arc, Mutex};
 use super::zeit::Timeframe;
 
 #[derive(Debug, Clone)]
-pub struct AppState {
+pub struct ProcessingState {
     // input:
     pub markdown_input: String,
     pub projects_input: String,
@@ -46,7 +46,7 @@ pub struct AppState {
     pub summary: String,
 }
 
-impl Default for AppState {
+impl Default for ProcessingState {
     fn default() -> Self {
         Self {
             markdown_input: include_str!("example.md").to_string(),
@@ -77,7 +77,7 @@ pub trait Update {
     fn create_summary(&mut self);
 }
 
-impl Update for AppState {
+impl Update for ProcessingState {
     fn update(&mut self) {
         // new files were opened:
         if self.overwrite_input.load(Ordering::Relaxed) {

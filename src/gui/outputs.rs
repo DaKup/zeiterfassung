@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
 #![allow(unused)]
 
-use crate::processing::{AppState, Update};
+use crate::processing::{ProcessingState, Update};
 
 #[derive(Debug, Clone, Default)]
 pub struct Outputs {
@@ -39,11 +39,11 @@ pub struct ResultOutputs {
 }
 
 pub trait UpdateOutputsTrait {
-    fn update(&mut self, state: &AppState);
+    fn update(&mut self, state: &ProcessingState);
 }
 
 impl UpdateOutputsTrait for ParserOutputs {
-    fn update(&mut self, state: &AppState) {
+    fn update(&mut self, state: &ProcessingState) {
         {
             self.lines_of_interest = state.log_lines.join("\n");
             self.parsed_timestamps = state
@@ -63,19 +63,19 @@ impl UpdateOutputsTrait for ParserOutputs {
 }
 
 impl UpdateOutputsTrait for ProcessingOutputs {
-    fn update(&mut self, state: &AppState) {
+    fn update(&mut self, state: &ProcessingState) {
         // todo!()
     }
 }
 
 impl UpdateOutputsTrait for ResultOutputs {
-    fn update(&mut self, state: &AppState) {
+    fn update(&mut self, state: &ProcessingState) {
         // todo!()
     }
 }
 
 impl UpdateOutputsTrait for Outputs {
-    fn update(&mut self, state: &AppState) {
+    fn update(&mut self, state: &ProcessingState) {
         self.parser.update(state);
         self.processing.update(state);
         self.results.update(state);
