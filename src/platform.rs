@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
 
-pub mod native;
-pub mod web;
+mod native;
+mod web;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use native::*;
