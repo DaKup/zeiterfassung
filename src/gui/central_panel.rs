@@ -1,15 +1,10 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
-use crate::gui::{
-    first_column, plot_durations, plot_timeframes, second_column, third_column, UpdateOutputsTrait,
-};
-use crate::processing::{zeit::AsMyStringTrait, Update};
+use crate::gui::{first_column, second_column, third_column, UpdateOutputsTrait};
+use crate::processing::Update;
 use crate::MainApp;
-use chrono::{Duration, Timelike};
-use egui::Ui;
 
-use egui_plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Line, Plot, PlotPoints};
+use egui::Ui;
 
 pub fn central_panel(
     app: &mut MainApp,
