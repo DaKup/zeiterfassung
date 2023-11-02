@@ -1,5 +1,4 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
 use crate::{platform, MainApp};
 use egui::TextBuffer;

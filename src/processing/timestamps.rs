@@ -1,5 +1,4 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
 use chrono::{Duration, NaiveDateTime, SubsecRound, Timelike};
 use std::ops::Add;
@@ -33,7 +32,7 @@ pub fn calculate_durations(timestamp_tasks: &[(NaiveDateTime, String)]) -> Vec<D
     let durations = timestamp_tasks
         .iter()
         .zip(timestamp_tasks.iter().skip(1))
-        .map(|((time0, task0), (time1, task1))| {
+        .map(|((time0, _task0), (time1, _task1))| {
             let difference = time1.timestamp() - time0.timestamp();
             Duration::seconds(difference)
         })

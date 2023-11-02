@@ -1,7 +1,5 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
-// use crate::processing::zeit::TimeframeTrait;
 use crate::MainApp;
 use chrono::Timelike;
 use egui::Ui;
@@ -9,20 +7,20 @@ use egui_plot::{Bar, BarChart, BoxElem, BoxPlot, BoxSpread, Legend, Plot};
 
 pub fn plot_timeframes(
     app: &mut MainApp,
-    ctx: &egui::Context,
-    frame: &mut eframe::Frame,
+    _ctx: &egui::Context,
+    _frame: &mut eframe::Frame,
     ui: &mut Ui,
     width: f32,
     height: f32,
-    rounded: bool,
+    _rounded: bool,
 ) {
     let bars: Vec<BoxElem> = app
         .state
         .tasks
         .iter()
         .enumerate()
-        .map(|(i, task)| {
-            let project_id = i;
+        .map(|(_i, task)| {
+            // let project_id = i;
             let project_id = 0;
 
             // let lower_whisker= task.timeframe.begin().timestamp() as f64;
@@ -80,8 +78,8 @@ pub fn plot_timeframes(
 
 pub fn plot_durations(
     app: &mut MainApp,
-    ctx: &egui::Context,
-    frame: &mut eframe::Frame,
+    _ctx: &egui::Context,
+    _frame: &mut eframe::Frame,
     ui: &mut Ui,
     width: f32,
     height: f32,

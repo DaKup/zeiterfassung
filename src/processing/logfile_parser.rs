@@ -1,5 +1,4 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
 use chrono::{self, NaiveDateTime};
 use regex::Regex;

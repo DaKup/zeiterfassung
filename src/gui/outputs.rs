@@ -1,7 +1,6 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
-use crate::processing::{ProcessingState, Update};
+use crate::processing::ProcessingState;
 
 #[derive(Debug, Clone, Default)]
 pub struct Outputs {
@@ -63,13 +62,13 @@ impl UpdateOutputsTrait for ParserOutputs {
 }
 
 impl UpdateOutputsTrait for ProcessingOutputs {
-    fn update(&mut self, state: &ProcessingState) {
+    fn update(&mut self, _state: &ProcessingState) {
         // todo!()
     }
 }
 
 impl UpdateOutputsTrait for ResultOutputs {
-    fn update(&mut self, state: &ProcessingState) {
+    fn update(&mut self, _state: &ProcessingState) {
         // todo!()
     }
 }
@@ -80,7 +79,7 @@ impl UpdateOutputsTrait for Outputs {
         self.processing.update(state);
         self.results.update(state);
 
-        let mut rounded_timestamps = state
+        let mut _rounded_timestamps = state
             .rounded_timestamp_tasks
             .iter()
             .map(|x| {
@@ -90,7 +89,7 @@ impl UpdateOutputsTrait for Outputs {
             .collect::<Vec<_>>()
             .join("\n");
 
-        let mut timestamps = state
+        let mut _timestamps = state
             .timestamp_tasks
             .iter()
             .map(|x| {
@@ -100,7 +99,7 @@ impl UpdateOutputsTrait for Outputs {
             .collect::<Vec<_>>()
             .join("\n");
 
-        let mut tasks = state
+        let mut _tasks = state
             .timestamp_tasks
             .iter()
             .map(|x| {
@@ -110,7 +109,7 @@ impl UpdateOutputsTrait for Outputs {
             .collect::<Vec<_>>()
             .join("\n");
 
-        let mut durations = state
+        let mut _durations = state
             .durations
             .iter()
             .map(|duration| {
@@ -121,7 +120,7 @@ impl UpdateOutputsTrait for Outputs {
             .collect::<Vec<_>>()
             .join("\n");
 
-        let mut rounded_durations = state
+        let mut _rounded_durations = state
             .rounded_durations
             .iter()
             .map(|duration| {
@@ -139,7 +138,7 @@ impl UpdateOutputsTrait for Outputs {
                 duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0
             })
             .sum();
-        let total_duration = format!("{:.2}h", total_duration);
+        let _total_duration = format!("{:.2}h", total_duration);
 
         let total_rounded_duration: f32 = state
             .rounded_durations
@@ -148,6 +147,6 @@ impl UpdateOutputsTrait for Outputs {
                 duration.num_hours() as f32 + (duration.num_minutes() % 60) as f32 / 60.0
             })
             .sum();
-        let total_rounded_duration = format!("{:.2}h", total_rounded_duration);
+        let _total_rounded_duration = format!("{:.2}h", total_rounded_duration);
     }
 }

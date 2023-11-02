@@ -1,16 +1,15 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
 use crate::MainApp;
 use egui::Ui;
 
 pub fn first_column(
     app: &mut MainApp,
-    ctx: &egui::Context,
-    frame: &mut eframe::Frame,
+    _ctx: &egui::Context,
+    _frame: &mut eframe::Frame,
     ui: &mut Ui,
     available_width: f32,
-    available_height: f32,
+    _available_height: f32,
     num_columns: u32,
 ) {
     // first column: input
@@ -24,7 +23,7 @@ pub fn first_column(
 
         ui.label("Markdown Input:").highlight();
 
-        let mut theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+        let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
         // ui.collapsing("Theme", |ui| {
         //     ui.group(|ui| {
         //         theme.ui(ui);

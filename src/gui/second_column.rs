@@ -1,5 +1,4 @@
 #![warn(clippy::all)]
-#![allow(unused)]
 
 use crate::gui::{plot_durations, plot_timeframes};
 use crate::processing::{zeit::AsMyStringTrait, ProjectType};
@@ -60,10 +59,10 @@ pub fn second_column(
 
         ui.label("");
 
-        let mut sum = 0;
-        let mut rounded_sum = 0;
+        let sum = 0;
+        let rounded_sum = 0;
 
-        let num_tasks = app.state.tasks.len();
+        let _num_tasks = app.state.tasks.len();
 
         for (_i, (e, s)) in app
             .state
