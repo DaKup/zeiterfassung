@@ -1,7 +1,6 @@
 #![warn(clippy::all)]
 
 use crate::gui::{first_column, second_column, third_column, UpdateOutputsTrait};
-use crate::processing::Update;
 use crate::MainApp;
 
 use egui::Ui;

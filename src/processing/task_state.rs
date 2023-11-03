@@ -8,8 +8,8 @@ pub struct TaskState {
     pub project_type: ProjectType,
 }
 
-impl TaskState {
-    pub fn default() -> TaskState {
+impl Default for TaskState {
+    fn default() -> Self {
         TaskState {
             enabled: true,
             project_type: ProjectType::Unknown,

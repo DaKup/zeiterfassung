@@ -2,4 +2,4 @@
 
 mod timeframe;
 
-pub use timeframe::*;
+pub use timeframe::{AsMyStringTrait, Timeframe};

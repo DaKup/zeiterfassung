@@ -72,13 +72,8 @@ impl Default for ProcessingState {
     }
 }
 
-pub trait Update {
-    fn update(&mut self);
-    fn create_summary(&mut self);
-}
-
-impl Update for ProcessingState {
-    fn update(&mut self) {
+impl ProcessingState {
+    pub fn update(&mut self) {
         // new files were opened:
         if self.overwrite_input.load(Ordering::Relaxed) {
             self.overwrite_input.store(false, Ordering::Relaxed);
